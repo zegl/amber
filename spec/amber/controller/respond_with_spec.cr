@@ -3,175 +3,183 @@ require "../../../spec_helper"
 module Amber::Controller
   describe Base do
     describe "#respond_with" do
-      request = HTTP::Request.new("GET", "")
-      request.headers["Accept"] = ""
-      context = create_context(request)
+      context "for HTML" do
+        subject = setup_subject
+        expected_html_content = "<html><body><h1>Elorest <3 Amber</h1></body></html>"
 
-      it "respond_with html as default option" do
-        expected_result = "<html><body><h1>Elorest <3 Amber</h1></body></html>"
-        ResponsesController.new(context).index.should eq expected_result
-        context.response.headers["Content-Type"].should eq "text/html"
-        context.response.status_code.should eq 200
+        it "returns `text/html` content" do
+          assert_response(subject, "text/html", 200, expected_html_content)
+
+          subject.request.headers["Accept"] = "*/*"
+          assert_response(subject, "text/html", 200, expected_html_content)
+
+          subject.request.headers["Accept"] = "text/html"
+          assert_response(subject, "text/html", 200, expected_html_content)
+        end
+
+        it "returns `text/html` content for .html path extension" do
+          subject.request.path = "/response/1.html"
+
+          assert_response(subject, "text/html", 200, expected_html_content)
+
+          subject.request.path = "/response/1.htm"
+          subject.request.headers["Accept"] = "application/xml"
+
+          assert_response(subject, "text/html", 200, expected_html_content)
+        end
       end
 
-      it "respond_with html as default option with */* header" do
-        expected_result = "<html><body><h1>Elorest <3 Amber</h1></body></html>"
-        context.request.headers["Accept"] = "*/*"
-        ResponsesController.new(context).index.should eq expected_result
-        context.response.headers["Content-Type"].should eq "text/html"
-        context.response.status_code.should eq 200
+      context "for JSON" do
+        subject = setup_subject
+        expected_json_content = %({"type":"json","name":"Amberator"})
+
+        it "returns `application/json` content" do
+          subject.request.headers["Accept"] = "application/json"
+          assert_response(subject, "application/json", 200, expected_json_content)
+
+          subject.request.headers["Accept"] = "application/json,*/*"
+          assert_response(subject, "application/json", 200, expected_json_content)
+        end
+
+        it "returns `application/json` content for .json path extension" do
+          subject.request.path = "/response/1.json"
+          subject.request.headers["Accept"] = "application/xml"
+
+          assert_response(subject, "application/json", 200, expected_json_content)
+        end
       end
 
-      it "respond_with html" do
-        expected_result = "<html><body><h1>Elorest <3 Amber</h1></body></html>"
-        context.request.headers["Accept"] = "text/html"
-        ResponsesController.new(context).index.should eq expected_result
-        context.response.headers["Content-Type"].should eq "text/html"
-        context.response.status_code.should eq 200
+      context "for XML" do
+        subject = setup_subject
+        expected_xml_content = "<xml><body><h1>Sort of xml</h1></body></xml>"
+
+        it "returns `application/xml` content" do
+          subject.request.headers["Accept"] = "application/xml"
+
+          assert_response(subject, "application/xml", 200, expected_xml_content)
+        end
+
+        it "returns `application/xml` content for .xml path extension" do
+          subject.request.path = "/response/1.xml"
+
+          assert_response(subject, "application/xml", 200, expected_xml_content)
+        end
       end
 
-      it "responds with json" do
-        expected_result = %({"type":"json","name":"Amberator"})
-        context.request.headers["Accept"] = "application/json"
-        ResponsesController.new(context).index.should eq expected_result
-        context.response.headers["Content-Type"].should eq "application/json"
-        context.response.status_code.should eq 200
+      context "for TEXT" do
+        subject = setup_subject
+        expected_text_content = "Hello I'm text!"
+
+        it "returns `text/plain` content" do
+          subject.request.headers["Accept"] = "text/plain"
+
+          assert_response(subject, "text/plain", 200, expected_text_content)
+        end
+
+        it "returns `text/plain` for TEXT path extensions" do
+          subject.request.path = "/response/1.txt"
+          assert_response(subject, "text/plain", 200, expected_text_content)
+
+          subject.request.path = "/response/1.text"
+          assert_response(subject, "text/plain", 200, expected_text_content)
+        end
       end
 
-      it "responds with json having */* at end" do
-        expected_result = %({"type":"json","name":"Amberator"})
-        context.request.headers["Accept"] = "application/json,*/*"
-        ResponsesController.new(context).index.should eq expected_result
-        context.response.headers["Content-Type"].should eq "application/json"
-        context.response.status_code.should eq 200
+      it "returns Response Not Acceptable when Text is not accepted" do
+        expected_content = "Response Not Acceptable."
+        subject = setup_subject
+        subject.request.path = "/response/1.text"
+
+        subject.show.should eq expected_content
+        subject.response.status_code.should eq 406
       end
 
-      it "responds with xml" do
-        expected_result = "<xml><body><h1>Sort of xml</h1></body></xml>"
-        context.request.headers["Accept"] = "application/xml"
-        ResponsesController.new(context).index.should eq expected_result
-        context.response.headers["Content-Type"].should eq "application/xml"
-        context.response.status_code.should eq 200
+      it "returns default content type for invalid extension and undefined Accept header" do
+        subject = setup_subject
+        subject.request.path = "/response/1.invalid"
+        subject.request.headers.delete("Accept")
+
+        assert_response(subject, "text/html", 200, "<html><body><h1>Elorest <3 Amber</h1></body></html>")
       end
 
-      it "responds with text" do
-        expected_result = "Hello I'm text!"
-        context.request.headers["Accept"] = "text/plain"
-        ResponsesController.new(context).index.should eq expected_result
-        context.response.headers["Content-Type"].should eq "text/plain"
-        context.response.status_code.should eq 200
+      it "returns Accept header content for invalid extension" do
+        subject = setup_subject
+        subject.request.headers["Accept"] = "application/json"
+        subject.request.path = "/response/1.invalid_extension"
+
+        assert_response(subject, "application/json", 200, %({"type":"json","name":"Amberator"}))
       end
 
-      it "responds with json for path.json" do
-        expected_result = %({"type":"json","name":"Amberator"})
-        context.request.path = "/response/1.json"
-        ResponsesController.new(context).index.should eq expected_result
-        context.response.headers["Content-Type"].should eq "application/json"
-        context.response.status_code.should eq 200
-      end
+      it "returns `text/html` content for invalid Accept header and having */* at end" do
+        subject = setup_subject
+        subject.request.headers["Accept"] = "unsupported/extension,*/*"
 
-      it "responds with xml for path.xml" do
-        expected_result = "<xml><body><h1>Sort of xml</h1></body></xml>"
-        context.request.path = "/response/1.xml"
-        ResponsesController.new(context).index.should eq expected_result
-        context.response.headers["Content-Type"].should eq "application/xml"
-        context.response.status_code.should eq 200
-      end
-
-      it "responds with text for path.txt" do
-        expected_result = "Hello I'm text!"
-        context.request.path = "/response/1.txt"
-        ResponsesController.new(context).index.should eq expected_result
-        context.response.headers["Content-Type"].should eq "text/plain"
-        context.response.status_code.should eq 200
-      end
-
-      it "responds with text for path.text" do
-        expected_result = "Hello I'm text!"
-        context.request.path = "/response/1.text"
-        ResponsesController.new(context).index.should eq expected_result
-        context.response.headers["Content-Type"].should eq "text/plain"
-        context.response.status_code.should eq 200
-      end
-
-      it "responds with 406 for path.text when text hasn't been defined" do
-        expected_result = "Response Not Acceptable."
-        context.request.path = "/response/1.text"
-        ResponsesController.new(context).show.should eq expected_result
-        context.response.status_code.should eq 406
-      end
-
-      it "respond with default if extension is invalid and accepts isn't defined" do
-        context.response.status_code = 200
-        expected_result = "<html><body><h1>Elorest <3 Amber</h1></body></html>"
-        context.request.path = "/response/1.texas"
-        context.request.headers["Accept"] = "text/html"
-        ResponsesController.new(context).index.should eq expected_result
-        context.response.headers["Content-Type"].should eq "text/html"
-        context.response.status_code.should eq 200
-      end
-
-      it "responds with or accept header request if extension is invalid" do
-        expected_result = %({"type":"json","name":"Amberator"})
-        context.request.headers["Accept"] = "application/json"
-        context.request.path = "/response/1.texas"
-        ResponsesController.new(context).index.should eq expected_result
-        context.response.headers["Content-Type"].should eq "application/json"
-        context.response.status_code.should eq 200
-      end
-
-      it "responds html as default with invalid extension but having */* at end" do
-        expected_result = "<html><body><h1>Elorest <3 Amber</h1></body></html>"
-        context.request.headers["Accept"] = "unsupported/extension,*/*"
-        ResponsesController.new(context).index.should eq expected_result
-        context.response.headers["Content-Type"].should eq "text/html"
-        context.response.status_code.should eq 200
+        assert_response(subject, "text/html", 200, "<html><body><h1>Elorest <3 Amber</h1></body></html>")
       end
 
       it "responds with 403 custom status_code" do
-        expected_result = %({"type":"json","error":"Unauthorized"})
-        context.request.headers["Accept"] = "application/json"
-        ResponsesController.new(context).custom_status_code.should eq expected_result
-        context.response.headers["Content-Type"].should eq "application/json"
-        context.response.status_code.should eq 403
+        subject = setup_subject
+        subject.request.headers["Accept"] = "application/json"
+
+        subject.custom_status_code.should eq %({"type":"json","error":"Unauthorized"})
+        subject.response.headers["Content-Type"].should eq "application/json"
+        subject.response.status_code.should eq 403
       end
 
       it "responds with html from a proc" do
-        context.response.status_code = 200
-        expected_result = "<html><body><h1>Elorest <3 Amber</h1></body></html>"
-        context.request.headers["Accept"] = "text/html"
-        ResponsesController.new(context).proc_html.should eq expected_result
-        context.response.headers["Content-Type"].should eq "text/html"
-        context.response.status_code.should eq 200
+        subject = setup_subject
+        subject.response.status_code = 200
+        subject.request.headers["Accept"] = "text/html"
+
+        subject.proc_html.should eq "<html><body><h1>Elorest <3 Amber</h1></body></html>"
+        subject.response.headers["Content-Type"].should eq "text/html"
+        subject.response.status_code.should eq 200
       end
 
-      it "redirects from a proc" do
-        context.response.status_code = 200
-        expected_result = "302"
-        context.request.headers["Accept"] = "text/html"
-        ResponsesController.new(context).proc_redirect.should eq expected_result
-        context.response.headers["Location"].should eq "/some_path"
-        context.response.status_code.should eq 302
-      end
+      context "Redirects" do
+        subject = setup_subject
+        
+        it "redirects from a proc" do
+          subject.response.status_code = 200
+          subject.request.headers["Accept"] = "text/html"
 
-      it "redirects with flash from a proc" do
-        context.response.status_code = 200
-        expected_result = "302"
-        context.request.headers["Accept"] = "text/html"
-        ResponsesController.new(context).proc_redirect_flash.should eq expected_result
-        context.flash["success"].should eq "amber is the bizness"
-        context.response.headers["Location"].should eq "/some_path"
-        context.response.status_code.should eq 302
-      end
+          subject.proc_redirect.should eq "302"
+          subject.response.headers["Location"].should eq "/some_path"
+          subject.response.status_code.should eq 302
+        end
 
-      it "redirects with a status code from a proc" do
-        context.response.status_code = 200
-        expected_result = "301"
-        context.request.headers["Accept"] = "text/html"
-        ResponsesController.new(context).proc_perm_redirect.should eq expected_result
-        context.response.headers["Location"].should eq "/some_path"
-        context.response.status_code.should eq 301
+        it "redirects with flash from a proc" do
+          subject.response.status_code = 200
+          subject.request.headers["Accept"] = "text/html"
+
+          subject.proc_redirect_flash.should eq "302"
+          subject.flash["success"].should eq "amber is the bizness"
+          subject.response.headers["Location"].should eq "/some_path"
+          subject.response.status_code.should eq 302
+        end
+
+        it "redirects with a status code from a proc" do
+          subject.response.status_code = 200
+          subject.request.headers["Accept"] = "text/html"
+          subject.proc_perm_redirect.should eq "301"
+
+          subject.response.headers["Location"].should eq "/some_path"
+          subject.response.status_code.should eq 301
+        end
       end
     end
   end
+end
+
+def setup_subject
+  request = HTTP::Request.new("GET", "")
+  request.headers["Accept"] = ""
+  context = create_context(request)
+  ResponsesController.new(context)
+end
+
+def assert_response(subject, content_type, status_code, expected_content)
+  subject.index.should eq expected_content
+  subject.response.headers["Content-Type"].should eq content_type
+  subject.response.status_code.should eq status_code
 end

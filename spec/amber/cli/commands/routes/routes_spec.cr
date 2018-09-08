@@ -31,7 +31,7 @@ module Amber::CLI
             expected = "Amber::StaticController"
             output.should contain expected
             line = output_lines.find("") { |this_line| this_line.includes? expected }
-            expectations = %w(get Amber::SController::Static index static /*)
+            expectations = %w(get Amber::StaticController index static /*)
             expectations.each do |expectation|
               line.should contain expectation
             end

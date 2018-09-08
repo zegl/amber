@@ -1,4 +1,3 @@
-
 module Responders
   alias ProcType = Proc(String) | Proc(Int32)
 

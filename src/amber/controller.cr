@@ -63,7 +63,7 @@ module Amber
     end
 
     property filters : Filters = Filters.new
-    
+
     def run_before_filter(action)
       if self.responds_to? :before_filters
         self.before_filters
@@ -79,6 +79,5 @@ module Amber
         @filters.run(:after, :all)
       end
     end
-
   end
 end

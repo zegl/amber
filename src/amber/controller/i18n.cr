@@ -1,4 +1,4 @@
- module I18n
+module I18n
   def t(*arg)
     ::I18n.translate(*arg, force_locale: context.locale)
   end

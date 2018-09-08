@@ -1,4 +1,3 @@
-
 module Redirect
   class Error < Exception
     def initialize(location)

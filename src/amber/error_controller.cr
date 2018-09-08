@@ -1,4 +1,4 @@
-require "./controller" 
+require "./controller"
 
 module Amber
   class ErrorController < Controller

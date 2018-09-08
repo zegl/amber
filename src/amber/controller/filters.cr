@@ -18,7 +18,7 @@ record FilterBuilder, filters : Filters, precedence : Symbol do
   end
 
   def only(actions : Array(Symbol), &block : -> Nil)
-    actions.each { |action| add(action, &block) }
+    actions.each { |_action| add(_action, &block) }
   end
 
   def all(&block : -> Nil)
@@ -33,7 +33,11 @@ end
 class Filters
   include Enumerable({Symbol, Array(Filter)})
 
-  property filters = {} of Symbol => Array(Filter)
+  getter :filters
+
+  def initialize
+    @filters = {} of Symbol => Array(Filter)
+  end
 
   def register(precedence : Symbol) : Nil
     with FilterBuilder.new(self, precedence) yield

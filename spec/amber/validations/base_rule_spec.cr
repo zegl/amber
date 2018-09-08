@@ -1,6 +1,6 @@
 require "../../spec_helper"
 
-module Amber::Validators
+module ParamsValidator
   describe BaseRule do
     describe "#apply" do
       it "raises error when missing field" do
@@ -9,7 +9,7 @@ module Amber::Validators
           false
         end
 
-        expect_raises Exceptions::Validator::InvalidParam do
+        expect_raises InvalidParam do
           rule.apply(params)
         end
       end

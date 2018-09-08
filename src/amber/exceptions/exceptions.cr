@@ -54,27 +54,5 @@ module Amber
         super(message || "Action is Forbidden.")
       end
     end
-
-    module Controller
-      class Redirect < Base
-        def initialize(location)
-          super("Cannot redirect to this location: #{location}")
-        end
-      end
-    end
-
-    module Validator
-      class ValidationFailed < Base
-        def initialize(errors)
-          super("Validation failed. #{errors}")
-        end
-      end
-
-      class InvalidParam < Base
-        def initialize(param)
-          super("The #{param} param was not found, make sure is typed correctly.")
-        end
-      end
-    end
   end
 end

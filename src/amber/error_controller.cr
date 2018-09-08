@@ -1,7 +1,7 @@
-require "./base"
+require "./controller" 
 
-module Amber::Controller
-  class Error < Base
+module Amber
+  class ErrorController < Controller
     def initialize(@context : HTTP::Server::Context, @ex : Exception)
       super(@context)
       @context.response.content_type = content_type

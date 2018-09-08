@@ -15,7 +15,7 @@ module Amber::Router
       end
 
       it "raises error for non existent param" do
-        expect_raises Amber::Exceptions::Validator::InvalidParam do
+        expect_raises ParamsValidator::InvalidParam do
           params["invalid"]
         end
       end

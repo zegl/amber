@@ -8,10 +8,14 @@ require "kilt/slang"
 require "redis"
 require "compiled_license"
 
-require "./amber/version"
-require "./amber/controller/**"
-require "./amber/dsl/**"
+
 require "./amber/exceptions/**"
+require "./amber/version"
+require "./amber/controller"
+require "./amber/static_controller"
+require "./amber/error_controller"
+
+require "./amber/dsl/**"
 require "./amber/extensions/**"
 require "./amber/router/context"
 require "./amber/pipes/**"

@@ -24,7 +24,7 @@ module Amber::Router
     end
 
     def [](key : Types::Key) : String
-      self.[key]? || raise Amber::Exceptions::Validator::InvalidParam.new(key)
+      self.[key]? || raise ParamsValidator::InvalidParam.new(key)
     end
 
     def []?(key : Types::Key)

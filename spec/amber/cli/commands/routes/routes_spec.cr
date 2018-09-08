@@ -28,10 +28,10 @@ module Amber::CLI
           end
 
           it "outputs the static file handler" do
-            expected = "Amber::Controller::Static"
+            expected = "Amber::StaticController"
             output.should contain expected
             line = output_lines.find("") { |this_line| this_line.includes? expected }
-            expectations = %w(get Amber::Controller::Static index static /*)
+            expectations = %w(get Amber::SController::Static index static /*)
             expectations.each do |expectation|
               line.should contain expectation
             end

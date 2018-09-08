@@ -1,4 +1,16 @@
-module Amber::Validators
+module ParamsValidator
+  class ValidationFailed < Exception
+    def initialize(errors)
+      super("Validation failed. #{errors}")
+    end
+  end
+
+  class InvalidParam < Exception
+    def initialize(param)
+      super("The #{param} param was not found, make sure is typed correctly.")
+    end
+  end
+
   # Holds a validation error message
   record Error, param : String, value : String?, message : String
 
@@ -14,7 +26,7 @@ module Amber::Validators
     end
 
     def apply(params : Amber::Router::Params)
-      raise Exceptions::Validator::InvalidParam.new(@field) unless params.has_key? @field
+      raise InvalidParam.new(@field) unless params.has_key? @field
       call_predicate(params)
     end
 
@@ -95,7 +107,7 @@ module Amber::Validators
     # ```
     def validate!
       return params if valid?
-      raise Amber::Exceptions::Validator::ValidationFailed.new errors
+      raise ValidationFailed.new errors
     end
 
     # Returns True or false whether the validation passed

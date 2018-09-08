@@ -1,6 +1,6 @@
 require "../../spec_helper"
 
-module Amber::Validators
+module ParamsValidator
   describe OptionalRule do
     describe "#apply" do
       it "does not apply rule when field is missing" do

@@ -1,20 +1,8 @@
 require "http"
 require "../../../spec_helper"
 
-class FakeController
-  macro params(klass, key = nil)
-    private class {{klass}}
-      include Validator
-      {{yield}}
-    end
-
-    def initialize
-     @params = HTTP::Params.parse("name=John Doe&age=21&email=eliasjpr@gmail.com&alive=true").to_h
-      @{{klass.stringify.id.downcase}} = {{klass}}.new(@params)
-    end
-  end
-
-  params User do
+class FakeController < Amber::Controller
+  params("User") do
     param email : String, size: (5..64), regex: /\w+@\w+\.\w{2,}/
     param name : String, size: (5..10)
     param age : Int32, gte: 18
@@ -29,7 +17,10 @@ end
 module Amber
   describe Controller do
     it "works" do
-      controller = FakeController.new
+      request = HTTP::Request.new("GET", "/?email=eliasjpr@gmail.com&name=elias&age=37&alive=true")
+      request.headers.add("Referer", "")
+      context = create_context(request)
+      controller = FakeController.new(context)
 
       controller.index.should be_true
     end

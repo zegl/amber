@@ -1,5 +1,7 @@
 require "http"
 
+require "./params"
+require "./controller/params_validator"
 require "./controller/filters"
 require "./controller/csrf"
 require "./controller/redirect"
@@ -7,7 +9,18 @@ require "./controller/render"
 require "./controller/responders"
 require "./controller/route_info"
 require "./controller/i18n"
-require "./controller/validator"
+
+macro params(klass, key = nil)
+  private class {{klass.id}}
+    include ParamsValidator
+
+    {{yield}}
+  end
+
+  def {{klass.id.downcase}}
+    {{klass.id}}.new(context.params)
+  end
+end
 
 module Amber
   class Controller
@@ -20,7 +33,7 @@ module Amber
 
     property filters : Filters = Filters.new
     protected getter context : HTTP::Server::Context
-    protected getter params : Validator::Params
+    protected getter raw_params : Amber::Params
 
     delegate :logger, to: Amber.settings
 
@@ -46,7 +59,7 @@ module Amber
       to: context
 
     def initialize(@context : HTTP::Server::Context)
-      @params = Validator::Params.new(context.params)
+      @raw_params = context.params
     end
 
     macro before_action

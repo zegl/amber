@@ -83,19 +83,19 @@ module Amber
 
     private def form
       return HTTP::Params.parse("") unless content_type?(URL_ENCODED_FORM)
-      @form ||= Parsers::FormData.parse(@request)
+      @form ||= ParamsParsers::FormData.parse(@request)
     end
 
     private def multipart
       return @multipart.not_nil! if @multipart
       return Parameters.new unless content_type?(MULTIPART_FORM)
-      @multipart, @files = Parsers::Multipart.parse(@request)
+      @multipart, @files = ParamsParsers::Multipart.parse(@request)
       @multipart.not_nil!
     end
 
     private def json
       return Parameters.new unless content_type?(APPLICATION_JSON)
-      @json ||= Parsers::JSON.parse(@request)
+      @json ||= ParamsParsers::JSON.parse(@request)
     end
 
     private def route

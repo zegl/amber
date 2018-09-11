@@ -53,7 +53,7 @@ module Amber
       @routes_hash["#{controller}##{action}"]
     end
 
-    def match(http_verb, resource) : RoutedResult(Route)
+    def match(http_verb, resource) : Amber::Router::RoutedResult(Route)
       result = @routes.find build_node(http_verb, resource)
       if result.found?
         result

@@ -17,7 +17,7 @@ class Hash(K, V)
   end
 end
 
-module Validator
+module ParamsValidator
   VERSION           = "0.1.0"
   TYPES             = [Nil, String, Bool, Int32, Int64, Float32, Float64, Time, Bytes]
   TIME_FORMAT_REGEX = /\d{4,}-\d{2,}-\d{2,}\s\d{2,}:\d{2,}:\d{2,}/
@@ -62,7 +62,7 @@ module Validator
       set_attributes(args)
     end
 
-    def initialize(args : HTTP::Params)
+    def initialize(args : Amber::Params)
       set_attributes(args)
     end
 
@@ -99,6 +99,12 @@ module Validator
       args.each do |k, v|
         cast(k, v.as(Any))
       end
+    end
+
+    def set_attributes(args : Amber::Params)
+      {% for name, options in FIELD_OPTIONS %}
+        cast({{name.id.stringify}}, args[{{name.id.stringify}}].as(Any))
+      {% end %}
     end
 
     def set_attributes(**args)

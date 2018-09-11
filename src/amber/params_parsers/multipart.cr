@@ -1,7 +1,10 @@
 module ParamsParsers
+  alias Files = Hash(String, File)
+  alias Parameters = Hash(String, String)
+
   module Multipart
-    def self.parse(request : HTTP::Request) : Tuple(Parameters, Files)
-      multipart_params = Parameters.new
+    def self.parse(request : HTTP::Request) : Tuple(ParamsParsers::Parameters, Files)
+      multipart_params = ParamsParsers::Parameters.new
       files = Files.new
 
       HTTP::FormData.parse(request) do |upload|

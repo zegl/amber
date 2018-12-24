@@ -22,8 +22,6 @@ module Amber::CLI
     property database : String = "pg"
     property language : String = "slang"
     property model : String = "granite"
-    property recipe : (String | Nil) = nil
-    property recipe_source : (String | Nil) = nil
     property watch : WatchOptions
 
     def initialize
@@ -34,8 +32,6 @@ module Amber::CLI
       database: {type: String, default: "pg"},
       language: {type: String, default: "slang"},
       model: {type: String, default: "granite"},
-      recipe: String | Nil,
-      recipe_source: String | Nil,
       watch: {type: WatchOptions, default: default_watch_options}
     )
 

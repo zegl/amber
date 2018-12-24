@@ -1,9 +1,8 @@
 require "../version"
 require "cli"
-require "./recipes/recipe"
-require "./templates/template"
+require "./templates"
 require "./config"
-require "./command"
+require "./commands/command"
 require "./commands/*"
 
 module Amber::CLI
@@ -32,7 +31,7 @@ module Amber::CLI
         defaults values shown above in this help message.
 
         Usage:
-        amber new [app_name] -d [pg | mysql | sqlite] -t [slang | ecr] -m [granite, crecto] --deps
+        amber new [app_name] -d [pg | mysql | sqlite] -t [slang | ecr] -m [granite | crecto] --deps
       EOS
 
       footer <<-EOS
@@ -48,7 +47,6 @@ module Amber::CLI
       string ["-t", "--template"], desc: "# Preconfigure for selected template engine. Options: slang | ecr", default: "slang"
       string ["-d", "--database"], desc: "# Preconfigure for selected database. Options: pg | mysql | sqlite", default: "pg"
       string ["-m", "--model"], desc: "# Preconfigure for selected model. Options: granite | crecto", default: "granite"
-      string ["-r", "--recipe"], desc: "# Use a named recipe.  See documentation at https://docs.amberframework.org/amber/cli/recipes.", default: nil
     end
   end
 end

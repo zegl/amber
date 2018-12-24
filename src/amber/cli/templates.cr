@@ -4,6 +4,8 @@ require "inflector"
 
 require "./helpers/helpers"
 require "./templates/*"
+require "./templates/scaffold/*"
+require "./templates/api/*"
 
 module Amber::CLI
   class Templates
